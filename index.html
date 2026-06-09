@@ -120,14 +120,13 @@
     -webkit-mask-image:radial-gradient(120% 90% at 18% 30%,#000 0%,transparent 72%);
             mask-image:radial-gradient(120% 90% at 18% 30%,#000 0%,transparent 72%)}
   .hero-inner{position:relative;z-index:1}
-  /* 3D 모듈러 매스 */
-  .hero-3d{position:absolute;top:0;right:0;bottom:0;width:46%;z-index:0;pointer-events:none}
+  /* 3D 모듈러 매스 — 화면에 고정, 콘텐츠 뒤 배경 레이어 */
+  .hero-3d{position:fixed;top:0;right:0;width:46%;height:100vh;z-index:-1;
+    pointer-events:none;will-change:opacity}
   .hero-3d canvas{width:100%!important;height:100%!important;display:block}
-  .hero-3d-cap{position:absolute;left:0;bottom:6px;z-index:2;font-family:var(--mono);
-    font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);opacity:.75}
   @media(min-width:861px){.hero-inner{max-width:60%}}
   @media(max-width:860px){
-    .hero-3d{position:relative;width:100%;height:42vh;margin-top:34px;right:auto;bottom:auto}
+    .hero-3d{top:auto;bottom:0;left:0;right:0;width:100%;height:52vh}
   }
   .hero .eyebrow{display:block;margin-bottom:clamp(22px,4vw,40px)}
   .hero h1{font-family:var(--display);font-weight:700;letter-spacing:-.025em;
@@ -193,6 +192,17 @@
   @media(max-width:560px){.etc-item{grid-template-columns:auto 1fr}.etc-item .y{grid-column:2;
     justify-self:start;margin-top:4px}}
 
+  /* ── GUESTBOOK ── */
+  .gb-intro{max-width:60ch;font-size:clamp(14px,1.6vw,16px);color:var(--ink-2);
+    line-height:1.7;margin-bottom:clamp(24px,3.5vw,36px)}
+  .gb-frame{border:1px solid var(--line-2);background:var(--paper-2);
+    position:relative;overflow:hidden}
+  .gb-frame iframe{display:block;width:100%;height:min(72vh,680px);border:0}
+  @media(max-width:560px){.gb-frame iframe{height:78vh}}
+  .gb-open{margin-top:16px;font-size:12px;letter-spacing:.04em}
+  .gb-open a{color:var(--accent);border-bottom:1px solid var(--line-2);padding-bottom:1px}
+  .gb-open a:hover{border-color:var(--accent)}
+
   /* ── CONTACT ── */
   .contact{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(36px,6vw,80px)}
   @media(max-width:860px){.contact{grid-template-columns:1fr}}
@@ -249,6 +259,7 @@
       <a href="#about">ABOUT</a>
       <a href="#project">PROJECT</a>
       <a href="#etc">ETC</a>
+      <a href="#guestbook">GUESTBOOK</a>
       <a href="#contact">CONTACT</a>
     </div>
   </nav>
@@ -276,9 +287,7 @@
       <span><b>도구</b> Rhino · Grasshopper · Revit · Ladybug</span>
     </div>
   </div>
-  <div class="hero-3d" id="hero3d" aria-hidden="true">
-    <span class="hero-3d-cap">MODULAR MASSING · 스크롤로 회전</span>
-  </div>
+  <div class="hero-3d" id="hero3d" aria-hidden="true"></div>
 </div>
 
 <!-- ───────── ABOUT ───────── -->
@@ -361,10 +370,27 @@
   </div>
 </section>
 
+<!-- ───────── GUESTBOOK ───────── -->
+<section id="guestbook" class="reveal">
+  <div class="sec-head">
+    <span class="idx">04</span><h2>Guestbook</h2><span class="ko">방명록</span>
+  </div>
+  <p class="gb-intro">남겨 주시는 메모는 Padlet 보드에 실시간으로 기록됩니다. 아래에서 바로 작성하거나, 새 창에서 열어 참여하실 수 있습니다.</p>
+  <div class="gb-frame">
+    <iframe
+      src="https://padlet.com/embed/padlet-undgfgs0o9s2ug37"
+      title="방명록 — Padlet"
+      loading="lazy"
+      frameborder="0"
+      allow="camera;microphone;geolocation;clipboard-write;encrypted-media"></iframe>
+  </div>
+  <p class="gb-open mono"><a href="https://padlet.com/jayurounnal/padlet-undgfgs0o9s2ug37" target="_blank" rel="noopener">새 창에서 Padlet 열기 →</a></p>
+</section>
+
 <!-- ───────── CONTACT ───────── -->
 <section id="contact" class="reveal">
   <div class="sec-head">
-    <span class="idx">04</span><h2>Contact</h2><span class="ko">연락하기</span>
+    <span class="idx">05</span><h2>Contact</h2><span class="ko">연락하기</span>
   </div>
   <div class="contact">
     <div>
@@ -501,8 +527,8 @@
 
   var scene  = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(5.6, 4.0, 7.6);
-  camera.lookAt(0, 0.3, 0);
+  camera.position.set(6.3, 4.5, 8.6);
+  camera.lookAt(0, 0.2, 0);
 
   var renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
   renderer.setClearColor(0x000000, 0);
@@ -551,12 +577,23 @@
   }
 
   var t0 = performance.now();
+  var heroEl = document.getElementById('home');
+  var MIN_OP = 0.12;  // 메인 영역을 벗어났을 때 유지되는 은은한 투명도
   function loop(now){
     var p = scrollProgress();
     var idle = reduce ? 0 : ((now - t0) / 1000) * 0.16; // 정지 시에도 은은히 회전
     building.rotation.y = -0.5 + p * Math.PI * 2.2 + idle;
     building.rotation.x = 0.05 + p * 0.45;
     building.position.y = p * 0.3;
+
+    // 히어로 안에서는 또렷하게, 벗어나면 부드럽게 페이드하되 계속 표시
+    var op = MIN_OP;
+    if (heroEl){
+      var t = Math.min(1, Math.max(0, heroEl.getBoundingClientRect().bottom / window.innerHeight));
+      op = MIN_OP + (1 - MIN_OP) * t;
+    }
+    mount.style.opacity = op.toFixed(3);
+
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
   }

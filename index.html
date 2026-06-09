@@ -111,7 +111,7 @@
   @media(max-width:560px){.sec-head .ko{display:none}}
 
   /* ── HERO ── */
-  .hero{position:relative;max-width:var(--maxw);margin:0 auto;
+  .hero{position:relative;max-width:var(--maxw);margin:0 auto;overflow:hidden;
     padding:clamp(72px,13vw,170px) var(--gut) clamp(60px,9vw,120px)}
   .hero .grid-bg{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.5;
     background-image:linear-gradient(var(--line) 1px,transparent 1px),
@@ -120,6 +120,15 @@
     -webkit-mask-image:radial-gradient(120% 90% at 18% 30%,#000 0%,transparent 72%);
             mask-image:radial-gradient(120% 90% at 18% 30%,#000 0%,transparent 72%)}
   .hero-inner{position:relative;z-index:1}
+  /* 3D 모듈러 매스 */
+  .hero-3d{position:absolute;top:0;right:0;bottom:0;width:46%;z-index:0;pointer-events:none}
+  .hero-3d canvas{width:100%!important;height:100%!important;display:block}
+  .hero-3d-cap{position:absolute;left:0;bottom:6px;z-index:2;font-family:var(--mono);
+    font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);opacity:.75}
+  @media(min-width:861px){.hero-inner{max-width:60%}}
+  @media(max-width:860px){
+    .hero-3d{position:relative;width:100%;height:42vh;margin-top:34px;right:auto;bottom:auto}
+  }
   .hero .eyebrow{display:block;margin-bottom:clamp(22px,4vw,40px)}
   .hero h1{font-family:var(--display);font-weight:700;letter-spacing:-.025em;
     font-size:clamp(40px,9vw,112px);line-height:.98}
@@ -266,6 +275,9 @@
       <span><b>전문</b> 모듈러 · BIM/MEP · 환경성능</span>
       <span><b>도구</b> Rhino · Grasshopper · Revit · Ladybug</span>
     </div>
+  </div>
+  <div class="hero-3d" id="hero3d" aria-hidden="true">
+    <span class="hero-3d-cap">MODULAR MASSING · 스크롤로 회전</span>
   </div>
 </div>
 
@@ -474,4 +486,80 @@
       openMailto(name, email, message);
     } finally { btn.disabled = false; }
   });
+</script>
+
+<!-- ════════ 3D 모듈러 매스 (three.js) ════════
+     · 외부 모델 파일 없이 코드로 생성되어 즉시 로드됩니다.
+     · 페이지 스크롤에 따라 건물이 회전·기울어집니다.
+     · 실제 프로젝트의 .glb 모델로 교체하려면 GLTFLoader 연결만 추가하면 됩니다. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var mount = document.getElementById('hero3d');
+  if (!mount || typeof THREE === 'undefined') return; // 로드 실패 시 히어로는 그대로 표시
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var scene  = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(5.6, 4.0, 7.6);
+  camera.lookAt(0, 0.3, 0);
+
+  var renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setClearColor(0x000000, 0);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  mount.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.78));
+  var key = new THREE.DirectionalLight(0xffffff, 0.72); key.position.set(4, 9, 6); scene.add(key);
+  var fill = new THREE.DirectionalLight(0xffffff, 0.22); fill.position.set(-6, 2, -4); scene.add(fill);
+
+  // 모듈러 매스 — 단위 셀의 적층
+  var building = new THREE.Group();
+  var COLS = 3, FLOORS = 8, DEPTH = 2;
+  var cw = 0.92, ch = 0.60, cd = 0.92, gap = 0.06;
+  var sx = cw + gap, sy = ch + gap, sz = cd + gap;
+
+  var faceMat = new THREE.MeshStandardMaterial({ color:0xf2f2ef, roughness:0.9, metalness:0.0 });
+  var coreMat = new THREE.MeshStandardMaterial({ color:0x294A7A, roughness:0.6, metalness:0.05 });
+  var edgeMat = new THREE.LineBasicMaterial({ color:0x17171b, transparent:true, opacity:0.5 });
+  var box   = new THREE.BoxGeometry(cw, ch, cd);
+  var edges = new THREE.EdgesGeometry(box);
+
+  for (var x=0; x<COLS; x++)
+   for (var y=0; y<FLOORS; y++)
+    for (var z=0; z<DEPTH; z++){
+      var isCore = (x === COLS-1 && z === 0);           // 코어(수직 동선)를 액센트 색으로
+      var mesh = new THREE.Mesh(box, isCore ? coreMat : faceMat);
+      mesh.position.set((x-(COLS-1)/2)*sx, (y-(FLOORS-1)/2)*sy, (z-(DEPTH-1)/2)*sz);
+      var line = new THREE.LineSegments(edges, edgeMat);
+      line.position.copy(mesh.position);
+      building.add(mesh); building.add(line);
+    }
+  scene.add(building);
+
+  function resize(){
+    var w = mount.clientWidth, h = mount.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize); resize();
+
+  function scrollProgress(){
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+  }
+
+  var t0 = performance.now();
+  function loop(now){
+    var p = scrollProgress();
+    var idle = reduce ? 0 : ((now - t0) / 1000) * 0.16; // 정지 시에도 은은히 회전
+    building.rotation.y = -0.5 + p * Math.PI * 2.2 + idle;
+    building.rotation.x = 0.05 + p * 0.45;
+    building.position.y = p * 0.3;
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
 </script>

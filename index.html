@@ -23,8 +23,8 @@
     --ink-2:#5C5C56;
     --line:rgba(23,23,27,.14);
     --line-2:rgba(23,23,27,.30);
-    --accent:#294A7A;          /* 제도 슬레이트 블루 */
-    --accent-2:#1B345C;
+    --accent:#17171B;          /* 포인트 컬러 — 블랙 */
+    --accent-2:#3A3A42;        /* 버튼 호버 (차콜) */
     --display:'Space Grotesk','Pretendard',sans-serif;
     --body:'Pretendard',system-ui,-apple-system,sans-serif;
     --mono:'IBM Plex Mono',ui-monospace,monospace;
@@ -543,7 +543,7 @@
   var sx = cw + gap, sy = ch + gap, sz = cd + gap;
 
   var faceMat = new THREE.MeshStandardMaterial({ color:0xf2f2ef, roughness:0.9, metalness:0.0 });
-  var coreMat = new THREE.MeshStandardMaterial({ color:0x294A7A, roughness:0.6, metalness:0.05 });
+  var coreMat = new THREE.MeshStandardMaterial({ color:0x1b1b20, roughness:0.6, metalness:0.05 });
   var edgeMat = new THREE.LineBasicMaterial({ color:0x17171b, transparent:true, opacity:0.5 });
   var box   = new THREE.BoxGeometry(cw, ch, cd);
   var edges = new THREE.EdgesGeometry(box);

@@ -193,17 +193,14 @@
     justify-self:start;margin-top:4px}}
 
   /* ── GUESTBOOK ── */
-  .gb-cta{border:1px solid var(--line-2);padding:clamp(34px,5vw,64px);
-    display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-  .gb-lead{font-family:var(--display);font-weight:500;font-size:clamp(22px,3vw,32px);
-    line-height:1.2;letter-spacing:-.01em}
-  .gb-sub{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-2)}
-  .gb-btn{margin-top:18px;display:inline-flex;align-items:center;gap:12px;background:var(--ink);
-    color:var(--paper);font-family:var(--mono);font-size:12px;letter-spacing:.12em;
-    text-transform:uppercase;padding:16px 28px;transition:background .25s}
-  .gb-btn:hover{background:var(--accent-2)}
-  .gb-btn .arrow{transition:transform .3s}
-  .gb-btn:hover .arrow{transform:translateX(4px)}
+  .gb-intro{max-width:60ch;font-size:clamp(14px,1.6vw,16px);color:var(--ink-2);
+    line-height:1.7;margin-bottom:clamp(22px,3vw,32px)}
+  .gb-frame{border:1px solid var(--line-2);background:var(--paper-2);overflow:hidden}
+  .gb-frame iframe{display:block;width:100%;height:min(72vh,680px);border:0}
+  @media(max-width:560px){.gb-frame iframe{height:78vh}}
+  .gb-open{margin-top:14px;font-size:12px;letter-spacing:.04em;color:var(--ink-2)}
+  .gb-open a{color:var(--accent);border-bottom:1px solid var(--line-2);padding-bottom:1px}
+  .gb-open a:hover{border-color:var(--accent)}
 
   /* ── CONTACT ── */
   .contact{display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(36px,6vw,80px)}
@@ -377,11 +374,16 @@
   <div class="sec-head">
     <span class="idx">04</span><h2>Guestbook</h2><span class="ko">방명록</span>
   </div>
-  <div class="gb-cta">
-    <p class="gb-lead">방문해 주셔서 감사합니다.<br>한 마디 남겨 주세요.</p>
-    <p class="gb-sub">남겨 주신 메모는 Padlet 보드에 실시간으로 모입니다.</p>
-    <a class="gb-btn" href="https://padlet.com/jayurounnal/padlet-undgfgs0o9s2ug37" target="_blank" rel="noopener">방명록 남기기 <span class="arrow">→</span></a>
+  <p class="gb-intro">남겨 주신 메모는 아래 보드에 실시간으로 모입니다. 페이지를 떠나지 않고 바로 작성하실 수 있습니다.</p>
+  <div class="gb-frame">
+    <iframe
+      src="https://padlet.com/embed/undgfgs0o9s2ug37"
+      title="방명록 — Padlet"
+      loading="lazy"
+      frameborder="0"
+      allow="camera;microphone;geolocation;clipboard-write;encrypted-media"></iframe>
   </div>
+  <p class="gb-open mono">보드가 보이지 않으면 → <a href="https://padlet.com/jayurounnal/padlet-undgfgs0o9s2ug37" target="_blank" rel="noopener">새 창에서 열기</a></p>
 </section>
 
 <!-- ───────── CONTACT ───────── -->
